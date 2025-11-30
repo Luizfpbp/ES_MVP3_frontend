@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui";
+import { ROUTES } from "../routes/routes";
 
 const Page404 = () => {
   const navigate = useNavigate();
 
   const handleBackHome = () => {
-    navigate("/");
+    navigate(ROUTES.HOME);
   };
 
   return (
