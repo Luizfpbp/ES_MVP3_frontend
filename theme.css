@@ -1,0 +1,65 @@
+:root {
+  --background: 40 20% 97%;
+  --foreground: 25 30% 15%;
+
+  --card: 40 15% 99%;
+  --card-foreground: 25 30% 15%;
+
+  --primary: 25 45% 35%;
+  --primary-foreground: 40 15% 98%;
+
+  --secondary: 35 40% 88%;
+  --secondary-foreground: 25 45% 25%;
+
+  --muted: 40 15% 92%;
+  --muted-foreground: 25 20% 45%;
+
+  --accent: 40 65% 55%;
+  --accent-foreground: 25 30% 15%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 40 15% 98%;
+
+  --border: 35 20% 85%;
+  --input: 35 20% 90%;
+  --ring: 25 45% 35%;
+
+  --radius: 0.75rem;
+}
+
+/* Utility classes que você pode usar diretamente no JSX/HTML */
+.bg-background {
+  background-color: hsl(var(--background));
+}
+.text-foreground {
+  color: hsl(var(--foreground));
+}
+
+.bg-card {
+  background-color: hsl(var(--card));
+}
+.text-card-foreground {
+  color: hsl(var(--card-foreground));
+}
+
+.bg-primary {
+  background-color: hsl(var(--primary));
+}
+.text-primary-foreground {
+  color: hsl(var(--primary-foreground));
+}
+
+.border-primary {
+  border-color: hsl(var(--primary));
+}
+.input-bg {
+  background-color: hsl(var(--input));
+}
+
+/* Sombras e radius */
+.shadow-elegant {
+  box-shadow: 0 4px 20px -4px hsl(25 30% 15% / 0.15);
+}
+.rounded-radius {
+  border-radius: var(--radius);
+}

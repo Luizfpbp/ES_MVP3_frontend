@@ -7,7 +7,7 @@ import { useSessionStore } from "../../../store/useSessionStore";
 
 const SideBar = () => {
   const navigate = useNavigate();
-  const { clearSession, returnUserType } = useSessionStore();
+  const { clearSession, session } = useSessionStore();
 
   const handleHomeClick = () => {
     navigate(ROUTES.HOME);
@@ -34,7 +34,7 @@ const SideBar = () => {
           />
           <SideBarItem label="Teste" onItemClick={handleTesteClick} />
         </div>
-        <p className="text-lg text-white">{returnUserType()}</p>
+        <p className="text-lg text-white">{session?.user ?? ""}</p>
       </div>
     </div>
   );

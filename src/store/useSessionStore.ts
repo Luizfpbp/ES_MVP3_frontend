@@ -10,7 +10,7 @@ interface ISessionStore {
   session: ISession | null;
   setSession: (session: ISession) => void;
   clearSession: () => void;
-  returnUserType: () => UserType | null;
+  canUserSee: (role: UserType) => boolean;
 }
 
 export const useSessionStore = create<ISessionStore>()(
@@ -21,9 +21,9 @@ export const useSessionStore = create<ISessionStore>()(
       queryClient.clear();
       set({ session: null });
     },
-    returnUserType: () => {
+    canUserSee: (role: UserType) => {
       const user = get().session?.user;
-      return user ?? null;
+      return user === role;
     },
   }))
 );
