@@ -1,0 +1,32 @@
+export const mockLoans = [
+  {
+    id: 1,
+    bookTitle: "Dom Casmurro",
+    bookAuthor: "Machado de Assis",
+    userName: "João Silva",
+    userEmail: "joao@email.com",
+    loanDate: "2024-01-15",
+    returnDate: "2024-02-15",
+    status: "active",
+  },
+  {
+    id: 2,
+    bookTitle: "Grande Sertão: Veredas",
+    bookAuthor: "Guimarães Rosa",
+    userName: "Maria Santos",
+    userEmail: "maria@email.com",
+    loanDate: "2024-01-10",
+    returnDate: "2024-02-10",
+    status: "active",
+  },
+  {
+    id: 3,
+    bookTitle: "Capitães da Areia",
+    bookAuthor: "Jorge Amado",
+    userName: "Pedro Costa",
+    userEmail: "pedro@email.com",
+    loanDate: "2023-12-20",
+    returnDate: "2024-01-20",
+    status: "returned",
+  },
+];

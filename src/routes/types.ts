@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 
-export interface IRoute {
+export interface Route {
   path: string;
   element: ComponentType;
 }

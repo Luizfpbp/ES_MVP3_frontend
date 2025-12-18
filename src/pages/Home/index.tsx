@@ -1,20 +1,17 @@
 import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useSessionStore } from "../../store/useSessionStore";
-import { UserType } from "../../store/types";
-import { Button, Card, Input, Select } from "../../components/ui";
-import { BookGenreFilterOptions } from "./constants/FilterOptions";
+import { Button } from "../../components/ui";
 import { useQuery } from "@tanstack/react-query";
 import { HOME_QUERY_KEY } from "./constants/queries";
-import { mockBooks } from "./components/mockbooks";
+import { mockBooks } from "./constants/mockbooks";
 import BookCard from "./components/BookCard";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../routes/routes";
 
 const Home = () => {
-  const { canUserSee } = useSessionStore();
-  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const { data: booksList } = useQuery({
-    queryKey: [HOME_QUERY_KEY.LIST_BOOKS, searchTerm],
+    queryKey: [HOME_QUERY_KEY.BOOKS_LIST],
     queryFn: () => mockBooks,
   });
 
@@ -25,27 +22,13 @@ const Home = () => {
           <h1 className="font-display font-bold mb-2">Catálogo de Livros</h1>
           <p className="text-black/50">Explore nosso acervo literário</p>
         </div>
-        {canUserSee(UserType.ADMIN) && (
-          <Button className="flex items-center">
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Livro
-          </Button>
-        )}
-      </div>
-
-      <div className="flex flex-col my-2 flex-none">
-        <Card className="flex-row">
-          <Input
-            placeholder="Buscar por título ou autor..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-          <Select
-            placeholder="Filtrar por gênero"
-            options={BookGenreFilterOptions}
-          />
-        </Card>
+        <Button
+          onClick={() => navigate(ROUTES.NEW_BOOKS)}
+          className="flex items-center"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Adicionar Livro
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-4 overflow-y-auto flex-1 pr-1">

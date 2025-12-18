@@ -1,6 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { Badge, Button, Card } from "../../../components/ui";
-import type { bookDTO } from "./mockbooks";
+import type { bookDTO } from "../constants/mockbooks";
 
 interface BookCardProps {
   index: number;

@@ -7,34 +7,31 @@ import { useSessionStore } from "../../../store/useSessionStore";
 
 const SideBar = () => {
   const navigate = useNavigate();
-  const { clearSession, session } = useSessionStore();
+  const { clearSession } = useSessionStore();
 
   const handleHomeClick = () => {
     navigate(ROUTES.HOME);
   };
 
-  const handleTesteClick = () => {
-    navigate(ROUTES.TESTE);
-  };
-
   return (
-    <div className="flex flex-col px-1 py-2">
-      <Button onClick={clearSession}>
-        <div className="flex gap-2">
+    <div className="flex flex-col items-center px-1 py-2">
+      <Button className="w-full" onClick={clearSession}>
+        <div className="flex items-center justify-center gap-2">
           <LogOutIcon />
           Logout
         </div>
       </Button>
-      <div className="flex flex-1 flex-col items-center border rounded-xl border-transparent bg-amber-800 p-4 m-2">
-        <div className="flex flex-1 flex-col gap-2">
+      <div className="flex flex-1 flex-col items-center border rounded-xl border-transparent bg-amber-800 w-full p-4 m-2">
+        <div className="flex flex-1 flex-col items-center gap-2">
           <BookOpen
             onClick={handleHomeClick}
             className="w-18 h-18 cursor-pointer"
             color="white"
           />
-          <SideBarItem label="Teste" onItemClick={handleTesteClick} />
+          <SideBarItem label="Catálogo" route={ROUTES.HOME} />
+          <SideBarItem label="Empréstimos" route={ROUTES.LOANS} />
+          <SideBarItem label="Usuários" route={ROUTES.USERS} />
         </div>
-        <p className="text-lg text-white">{session?.user ?? ""}</p>
       </div>
     </div>
   );

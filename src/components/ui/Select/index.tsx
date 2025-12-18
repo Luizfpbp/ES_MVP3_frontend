@@ -14,34 +14,38 @@ type option = {
 };
 
 interface SelectProps {
-  placeholder?: string;
   options: option[];
+  className?: string;
+  placeholder?: string;
   selectTriggerClassName?: string;
   selectContentClassName?: string;
+  onChange?: (value: string) => void;
 }
 
 const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
   ({
-    placeholder = "Selecione",
     options,
+    className,
+    placeholder = "Selecione",
     selectTriggerClassName,
     selectContentClassName,
+    onChange,
     ...props
   }) => {
     return (
-      <SelectRoot {...props}>
-        <SelectTrigger
-          className={cn("w-full md:w-[200px]", selectTriggerClassName)}
-        >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent className={selectContentClassName}>
-          {options.map((opt, index) => (
-            <SelectItem key={`${opt.value}-${index}`} value={opt.value}>
-              {opt.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
+      <SelectRoot onValueChange={onChange} {...props}>
+        <div className={cn("border border-black rounded-xl w-full", className)}>
+          <SelectTrigger className={selectTriggerClassName}>
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent className={selectContentClassName}>
+            {options.map((opt, index) => (
+              <SelectItem key={`${opt.value}-${index}`} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </div>
       </SelectRoot>
     );
   }

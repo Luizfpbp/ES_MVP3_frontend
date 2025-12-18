@@ -1,8 +1,7 @@
 export enum UserType {
   ADMIN = "admin",
-  CLIENT = "client",
 }
 
-export interface ISession {
+export interface Session {
   user: UserType;
 }

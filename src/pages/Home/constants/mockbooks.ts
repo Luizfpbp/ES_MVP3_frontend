@@ -64,3 +64,11 @@ export const mockBooks: bookDTO[] = [
     copies: 0,
   },
 ];
+
+export const booksOptions = [
+  { value: "1", label: "Clean Code" },
+  { value: "2", label: "Refactoring" },
+  { value: "3", label: "Design Patterns" },
+  { value: "4", label: "You Don't Know JS" },
+  { value: "5", label: "The Pragmatic Programmer" },
+];

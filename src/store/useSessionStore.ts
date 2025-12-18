@@ -1,29 +1,24 @@
 import { devtools, persist } from "zustand/middleware";
 import { create, type StateCreator } from "zustand";
-import type { ISession, UserType } from "./types";
+import type { Session } from "./types";
 import { queryClient } from "../libs/react-query";
 
-const middleware = (f: StateCreator<ISessionStore, [], []>) =>
+const middleware = (f: StateCreator<SessionStore, [], []>) =>
   devtools(persist(f, { name: "session" }));
 
-interface ISessionStore {
-  session: ISession | null;
-  setSession: (session: ISession) => void;
+interface SessionStore {
+  session: Session | null;
+  setSession: (session: Session) => void;
   clearSession: () => void;
-  canUserSee: (role: UserType) => boolean;
 }
 
-export const useSessionStore = create<ISessionStore>()(
-  middleware((set, get) => ({
+export const useSessionStore = create<SessionStore>()(
+  middleware((set) => ({
     session: null,
-    setSession: (session: ISession) => set({ session }),
+    setSession: (session: Session) => set({ session }),
     clearSession: () => {
       queryClient.clear();
       set({ session: null });
-    },
-    canUserSee: (role: UserType) => {
-      const user = get().session?.user;
-      return user === role;
     },
   }))
 );
