@@ -1,17 +1,30 @@
-import { UserPlus, Shield } from "lucide-react";
-import { Badge, Button, Card } from "../../components/ui";
+import { UserPlus } from "lucide-react";
+import { Button, Card } from "../../components/ui";
 import { useQuery } from "@tanstack/react-query";
-import { mockUsers } from "./constants/mockusers";
 import { USERS_QUERY_KEY } from "./constants/queries";
 import { ROUTES } from "../../routes/routes";
 import { useNavigate } from "react-router-dom";
+import type { UserListDTO } from "./types";
+import { toast } from "react-toastify";
+import { useEffect } from "react";
+
+const DB_URL = import.meta.env.VITE_API_URL;
 
 const Users = () => {
   const navigate = useNavigate();
-  const { data: usersList = [] } = useQuery({
+  const { data: usersList, isError } = useQuery<UserListDTO>({
     queryKey: [USERS_QUERY_KEY.USERS_LIST],
-    queryFn: () => mockUsers,
+    queryFn: async () => {
+      const url = `${DB_URL}/usuarios`;
+
+      const response = await fetch(url);
+      return await response.json();
+    },
   });
+
+  useEffect(() => {
+    if (isError) toast.error("Erro ao buscar os usuários");
+  }, [isError]);
 
   return (
     <div className="flex flex-col h-screen w-full p-2">
@@ -38,7 +51,7 @@ const Users = () => {
       <Card className="shadow-soft border-border/50">
         <p className="font-display">Lista de Usuários</p>
         <p className="text-black/50">
-          Total de {mockUsers.length} usuários cadastrados
+          Total de {usersList?.values.length ?? 0} usuários cadastrados
         </p>
 
         <div className="rounded-md border border-border/50 w-full">
@@ -50,48 +63,22 @@ const Users = () => {
                 <th className="font-semibold text-start py-1 px-4">
                   Data Nasc.
                 </th>
-                <th className="font-semibold text-start py-1 px-4">Tipo</th>
-                <th className="font-semibold text-start py-1 px-4">Status</th>
               </tr>
             </thead>
             <tbody className="[&_tr:last-child]:border-0">
-              {usersList.map((user) => (
+              {usersList?.values.map((user) => (
                 <tr
                   key={user.id}
                   className="hover:bg-black/30 transition-colors"
                 >
                   <td className="p-4 [&:has([role=checkbox])]:pr-0">
-                    {user.name}
+                    {user.nome}
                   </td>
                   <td className="p-4 [&:has([role=checkbox])]:pr-0">
                     {user.email}
                   </td>
                   <td className="p-4 [&:has([role=checkbox])]:pr-0">
-                    {new Date(user.birthdate).toLocaleDateString("pt-BR")}
-                  </td>
-                  <td className="p-4 [&:has([role=checkbox])]:pr-0">
-                    <Badge
-                      variant={user.role === "admin" ? "default" : "secondary"}
-                      className={user.role === "admin" ? "bg-primary" : ""}
-                    >
-                      {user.role === "admin" ? (
-                        <>
-                          <Shield className="w-3 h-3 mr-1" />
-                          Admin
-                        </>
-                      ) : (
-                        "Cliente"
-                      )}
-                    </Badge>
-                  </td>
-                  <td className="p-4 [&:has([role=checkbox])]:pr-0">
-                    <Badge
-                      variant={
-                        user.status === "active" ? "default" : "secondary"
-                      }
-                    >
-                      {user.status === "active" ? "Ativo" : "Inativo"}
-                    </Badge>
+                    {new Date(user.data_nascimento).toLocaleDateString("pt-BR")}
                   </td>
                 </tr>
               ))}
@@ -99,7 +86,7 @@ const Users = () => {
           </table>
         </div>
 
-        {usersList.length === 0 && (
+        {usersList?.values.length === 0 && (
           <div className="py-12 text-center">
             <p className="text-muted-foreground">Nenhum usuário encontrado.</p>
           </div>

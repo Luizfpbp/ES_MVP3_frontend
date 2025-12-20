@@ -13,21 +13,26 @@ import {
   newLoanSchema,
   type NewLoanFormValues,
 } from "./schema";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HOME_QUERY_KEY } from "../../Home/constants/queries";
-import { booksOptions } from "../../Home/constants/mockbooks";
-import { usersOptions } from "../../Users/constants/mockusers";
 import { USERS_QUERY_KEY } from "../../Users/constants/queries";
+import type { BookListDTO } from "../../Home/types";
+import type { UserListDTO } from "../../Users/types";
+import { LOAN_QUERY_KEY } from "../constants/queries";
+import { toast } from "react-toastify";
 
 interface NewLoanModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
+const DB_URL = import.meta.env.VITE_API_URL;
+
 const NewLoanModal = ({ open, setOpen }: NewLoanModalProps) => {
+  const queryClient = useQueryClient();
   const {
-    control,
     reset,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm({
@@ -35,15 +40,63 @@ const NewLoanModal = ({ open, setOpen }: NewLoanModalProps) => {
     defaultValues: newLoanInitialData,
   });
 
-  const { data: booksList = [], isLoading: isBooksLoading } = useQuery({
-    queryKey: [HOME_QUERY_KEY.BOOKS_LIST_OPTIONS],
-    queryFn: () => booksOptions,
+  const { mutateAsync: loanBook, isPending: isLoaningBook } = useMutation({
+    mutationKey: [LOAN_QUERY_KEY.CREATE_LOAN],
+    mutationFn: async (form: FormData) => {
+      const response = await fetch(`${DB_URL}/emprestimo`, {
+        method: "post",
+        body: form,
+      });
+
+      return await response.json();
+    },
+    onSuccess() {
+      toast.success("Livro emprestado com sucesso");
+      queryClient.invalidateQueries({ queryKey: [LOAN_QUERY_KEY.LIST_LOANS] });
+      queryClient.invalidateQueries({ queryKey: [HOME_QUERY_KEY.BOOKS_LIST] });
+      queryClient.invalidateQueries({
+        queryKey: [HOME_QUERY_KEY.BOOKS_LIST_OPTIONS],
+      });
+      handleClose(false);
+    },
+    onError() {
+      toast.error("Erro ao emprestar o livro");
+    },
   });
 
-  const { data: usersList = [], isLoading: isUsersLoading } = useQuery({
-    queryKey: [USERS_QUERY_KEY.USERS_LIST_OPTIONS],
-    queryFn: () => usersOptions,
+  const { data: booksList, isLoading: isBooksLoading } = useQuery<BookListDTO>({
+    queryKey: [HOME_QUERY_KEY.BOOKS_LIST_OPTIONS],
+    queryFn: async () => {
+      const url = `${DB_URL}/livros`;
+
+      const response = await fetch(url);
+      return await response.json();
+    },
   });
+
+  const { data: usersList, isLoading: isUsersLoading } = useQuery<UserListDTO>({
+    queryKey: [USERS_QUERY_KEY.USERS_LIST_OPTIONS],
+    queryFn: async () => {
+      const url = `${DB_URL}/usuarios`;
+
+      const response = await fetch(url);
+      return await response.json();
+    },
+  });
+
+  const booksOptions = booksList?.values
+    .filter((book) => book.disponivel > 0)
+    .map((book) => ({
+      ...book,
+      value: book.id.toString(),
+      label: book.titulo,
+    }));
+
+  const userOptions = usersList?.values.map((user) => ({
+    ...user,
+    value: user.id.toString(),
+    label: user.nome,
+  }));
 
   const handleClose = (open: boolean) => {
     reset(newLoanInitialData);
@@ -51,7 +104,10 @@ const NewLoanModal = ({ open, setOpen }: NewLoanModalProps) => {
   };
 
   const onSubmit = (values: NewLoanFormValues) => {
-    console.log("form", values);
+    const form = new FormData();
+    form.append("usuario_id", values.usuario);
+    form.append("livro_id", values.livro);
+    loanBook(form);
   };
 
   return (
@@ -69,7 +125,7 @@ const NewLoanModal = ({ open, setOpen }: NewLoanModalProps) => {
         >
           <Controller
             control={control}
-            name="book"
+            name="livro"
             render={({ field }) => (
               <>
                 <label>Livro</label>
@@ -78,17 +134,17 @@ const NewLoanModal = ({ open, setOpen }: NewLoanModalProps) => {
                   placeholder={
                     isBooksLoading ? "Carregando..." : "Selecione um Livro"
                   }
-                  options={booksList}
+                  options={booksOptions ?? []}
                 />
-                {errors.book && (
-                  <p className="text-red-500 text-sm">{errors.book.message}</p>
+                {errors.livro && (
+                  <p className="text-red-500 text-sm">{errors.livro.message}</p>
                 )}
               </>
             )}
           />
           <Controller
             control={control}
-            name="user"
+            name="usuario"
             render={({ field }) => (
               <>
                 <label>Usuário</label>
@@ -97,15 +153,17 @@ const NewLoanModal = ({ open, setOpen }: NewLoanModalProps) => {
                   placeholder={
                     isUsersLoading ? "Carregando..." : "Selecione um usuário"
                   }
-                  options={usersList}
+                  options={userOptions ?? []}
                 />
-                {errors.user && (
-                  <p className="text-red-500 text-sm">{errors.user.message}</p>
+                {errors.usuario && (
+                  <p className="text-red-500 text-sm">
+                    {errors.usuario.message}
+                  </p>
                 )}
               </>
             )}
           />
-          <Button type="submit" className="w-full">
+          <Button type="submit" disabled={isLoaningBook} className="w-full">
             Confirmar Empréstimo
           </Button>
         </form>

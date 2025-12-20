@@ -1,18 +1,24 @@
 import { useNavigate } from "react-router-dom";
 import { BookPlus } from "lucide-react";
-import { Button, Card, Input } from "../../../components/ui";
+import { Button, Card, Input, Select } from "../../../components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ROUTES } from "../../../routes/routes";
 import { Controller, useForm } from "react-hook-form";
 import { HOME_QUERY_KEY } from "../constants/queries";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   newBookInitialData,
   newBookSchema,
   type NewBookFormValues,
 } from "./schema";
+import { toast } from "react-toastify";
+import { BOOK_GENRE_OPTIONS } from "../constants";
+import { convertInputDate } from "../../../components/utils";
+
+const DB_URL = import.meta.env.VITE_API_URL;
 
 const BookForm = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const {
@@ -26,16 +32,43 @@ const BookForm = () => {
 
   const { mutateAsync: createBook, isPending: isCreatingBook } = useMutation({
     mutationKey: [HOME_QUERY_KEY.BOOKS_ADD],
-    mutationFn: async () => {},
+    mutationFn: async (values: FormData) => {
+      const response = await fetch(`${DB_URL}/livro`, {
+        method: "post",
+        body: values,
+      });
+      if (!response.ok) {
+        throw new Error("Erro ao criar livro");
+      }
+
+      return response.json();
+    },
+    onSuccess() {
+      toast.success("Sucesso ao criar um livro");
+      queryClient.invalidateQueries({ queryKey: [HOME_QUERY_KEY.BOOKS_LIST] });
+      queryClient.invalidateQueries({
+        queryKey: [HOME_QUERY_KEY.BOOKS_LIST_OPTIONS],
+      });
+      navigate(ROUTES.HOME);
+    },
+    onError() {
+      toast.error("Erro ao criar um livro");
+    },
   });
 
   const onSubmit = async (values: NewBookFormValues) => {
-    console.log(values);
-    createBook();
+    const form = new FormData();
+    form.append("autor", values.autor);
+    form.append("genero", values.genero);
+    form.append("lancamento", convertInputDate(values.lancamento));
+    form.append("titulo", values.titulo);
+    form.append("disponivel", values.disponivel.toString());
+
+    createBook(form);
   };
 
   return (
-    <div className="flex flex-col h-screen w-full p-2">
+    <div className="flex flex-col h-screen w-full">
       <div className="flex flex-col flex-none">
         <h1 className="text-4xl font-display font-bold mb-2">
           Cadastrar Livro
@@ -61,7 +94,7 @@ const BookForm = () => {
         >
           <Controller
             control={control}
-            name="title"
+            name="titulo"
             render={({ field }) => (
               <div>
                 <label>Título</label>
@@ -71,8 +104,10 @@ const BookForm = () => {
                   placeholder="Digite o título"
                   className="transition-all duration-300 focus:shadow-soft w-full"
                 />
-                {errors.title && (
-                  <p className="text-red-500 text-sm">{errors.title.message}</p>
+                {errors.titulo && (
+                  <p className="text-red-500 text-sm">
+                    {errors.titulo.message}
+                  </p>
                 )}
               </div>
             )}
@@ -80,7 +115,7 @@ const BookForm = () => {
 
           <Controller
             control={control}
-            name="author"
+            name="autor"
             render={({ field }) => (
               <div>
                 <label>Autor</label>
@@ -90,10 +125,8 @@ const BookForm = () => {
                   placeholder="Digite o nome do autor"
                   className="transition-all duration-300 focus:shadow-soft w-full"
                 />
-                {errors.author && (
-                  <p className="text-red-500 text-sm">
-                    {errors.author.message}
-                  </p>
+                {errors.autor && (
+                  <p className="text-red-500 text-sm">{errors.autor.message}</p>
                 )}
               </div>
             )}
@@ -102,19 +135,18 @@ const BookForm = () => {
           <div className="grid grid-cols-2 gap-4">
             <Controller
               control={control}
-              name="genre"
+              name="genero"
               render={({ field }) => (
                 <div>
                   <label>Gênero</label>
-                  <Input
-                    {...field}
-                    type="text"
-                    placeholder="Digite o gênero"
-                    className="transition-all duration-300 focus:shadow-soft w-full"
+                  <Select
+                    onChange={field.onChange}
+                    placeholder="Selecione um gênero"
+                    options={BOOK_GENRE_OPTIONS}
                   />
-                  {errors.genre && (
+                  {errors.genero && (
                     <p className="text-red-500 text-sm">
-                      {errors.genre.message}
+                      {errors.genero.message}
                     </p>
                   )}
                 </div>
@@ -122,19 +154,19 @@ const BookForm = () => {
             />
             <Controller
               control={control}
-              name="publishYear"
+              name="lancamento"
               render={({ field }) => (
                 <div>
                   <label>Ano de publicação</label>
                   <Input
                     {...field}
-                    type="text"
-                    placeholder="Digite o ano de publicação"
+                    type="date"
+                    placeholder="Selecione a data de publicação"
                     className="transition-all duration-300 focus:shadow-soft w-full"
                   />
-                  {errors.publishYear && (
+                  {errors.lancamento && (
                     <p className="text-red-500 text-sm">
-                      {errors.publishYear.message}
+                      {errors.lancamento.message}
                     </p>
                   )}
                 </div>
@@ -144,7 +176,7 @@ const BookForm = () => {
 
           <Controller
             control={control}
-            name="copiesNumber"
+            name="disponivel"
             render={({ field }) => (
               <div>
                 <label>Número de cópias</label>
@@ -155,9 +187,9 @@ const BookForm = () => {
                   placeholder="Digite o número de cópias"
                   className="transition-all duration-300 focus:shadow-soft w-full"
                 />
-                {errors.copiesNumber && (
+                {errors.disponivel && (
                   <p className="text-red-500 text-sm">
-                    {errors.copiesNumber.message}
+                    {errors.disponivel.message}
                   </p>
                 )}
               </div>

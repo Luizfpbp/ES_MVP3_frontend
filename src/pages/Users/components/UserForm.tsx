@@ -10,13 +10,18 @@ import {
   type NewUserFormValues,
 } from "./schema";
 import { USERS_QUERY_KEY } from "../constants/queries";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDebouncedCallback } from "use-debounce";
 import { useEffect, useState } from "react";
 import useZipFinder from "../../../hooks/useZipFinder";
+import { convertInputDate } from "../../../components/utils";
+import { toast } from "react-toastify";
+
+const DB_URL = import.meta.env.VITE_API_URL;
 
 const UserForm = () => {
   const [zipCode, setZipCode] = useState("");
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const { data: zipData, isLoadingZip } = useZipFinder(zipCode);
@@ -33,12 +38,29 @@ const UserForm = () => {
 
   const { mutateAsync: createUser, isPending: isCreatingUser } = useMutation({
     mutationKey: [USERS_QUERY_KEY.USERS_ADD],
-    mutationFn: async () => {},
+    mutationFn: async (values: FormData) => {
+      const response = await fetch(`${DB_URL}/usuario`, {
+        method: "post",
+        body: values,
+      });
+
+      return await response.json();
+    },
+    onSuccess() {
+      toast.success("Sucesso ao criar um usuário");
+      queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY.USERS_LIST] });
+      queryClient.invalidateQueries({
+        queryKey: [USERS_QUERY_KEY.USERS_LIST_OPTIONS],
+      });
+      navigate(ROUTES.USERS);
+    },
+    onError() {
+      toast.error("Erro ao criar um usuário");
+    },
   });
 
   useEffect(() => {
     if (zipData) {
-      console.log("save");
       setValue("address.state", zipData.uf);
       setValue("address.street", zipData.logradouro);
       setValue("address.neighborhood", zipData.bairro);
@@ -49,15 +71,25 @@ const UserForm = () => {
   const debouncedSetZipCode = useDebouncedCallback((value: string) => {
     value = value.replace(/\D/g, "");
     if (value.length === 8) {
-      console.log("cep", value);
-
       setZipCode(value);
     }
   }, 500);
 
   const onSubmit = async (values: NewUserFormValues) => {
-    console.log(values);
-    createUser();
+    const form = new FormData();
+    form.append("nome", values.nome);
+    form.append("email", values.email);
+    form.append("data_nascimento", convertInputDate(values.data_nascimento));
+
+    form.append("cep", values.address.postalCode ?? "");
+    form.append("estado", values.address.state ?? "");
+    form.append("cidade", values.address.city ?? "");
+    form.append("rua", values.address.street ?? "");
+    form.append("bairro", values.address.neighborhood ?? "");
+    form.append("numero", values.address.number ?? "");
+    form.append("complemento", values.address.complement ?? "");
+
+    createUser(form);
   };
 
   return (
@@ -89,7 +121,7 @@ const UserForm = () => {
             <div className="space-y-2">
               <Controller
                 control={control}
-                name="name"
+                name="nome"
                 render={({ field }) => (
                   <>
                     <label>Nome completo</label>
@@ -130,7 +162,7 @@ const UserForm = () => {
             <div className="space-y-2">
               <Controller
                 control={control}
-                name="birthDate"
+                name="data_nascimento"
                 render={({ field }) => (
                   <>
                     <label>Data de nascimento</label>
@@ -139,48 +171,9 @@ const UserForm = () => {
                       onChange={field.onChange}
                       className="transition-all duration-300 focus:shadow-soft"
                     />
-                  </>
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Controller
-                control={control}
-                name="password"
-                render={({ field }) => (
-                  <>
-                    <label>Senha</label>
-                    <Input
-                      {...field}
-                      type="password"
-                      className="transition-all duration-300 focus:shadow-soft"
-                    />
-                    {errors.password && (
+                    {errors.data_nascimento && (
                       <p className="text-red-500 text-sm">
-                        {errors.password.message}
-                      </p>
-                    )}
-                  </>
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Controller
-                control={control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <>
-                    <label>Confirmar senha</label>
-                    <Input
-                      {...field}
-                      type="password"
-                      className="transition-all duration-300 focus:shadow-soft"
-                    />
-                    {errors.confirmPassword && (
-                      <p className="text-red-500 text-sm">
-                        {errors.confirmPassword.message}
+                        {errors.data_nascimento.message}
                       </p>
                     )}
                   </>

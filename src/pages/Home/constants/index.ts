@@ -1,0 +1,17 @@
+export const BOOK_GENRE_OPTIONS = [
+  { value: "Romance", label: "Romance" },
+  { value: "Ficção Científica", label: "Ficção Científica" },
+  { value: "Fantasia", label: "Fantasia" },
+  { value: "Biografia", label: "Biografia" },
+  { value: "História", label: "História" },
+  { value: "Mistério", label: "Mistério" },
+  { value: "Terror", label: "Terror" },
+  { value: "Aventura", label: "Aventura" },
+  { value: "Drama", label: "Drama" },
+  { value: "Poesia", label: "Poesia" },
+  { value: "Educação", label: "Educação" },
+  { value: "Infantil", label: "Infantil" },
+  { value: "Autoajuda", label: "Autoajuda" },
+  { value: "Religião", label: "Religião" },
+  { value: "Comédia", label: "Comédia" },
+];
