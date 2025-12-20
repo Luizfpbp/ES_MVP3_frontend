@@ -1,8 +1,8 @@
 import Auth from "../pages/Auth";
 import { ROUTES } from "./routes";
-import type { IRoute } from "./types";
+import type { Route } from "./types";
 
-export const authRouteList: IRoute[] = [
+export const authRouteList: Route[] = [
   {
     path: ROUTES.LOGIN,
     element: Auth,
