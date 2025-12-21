@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 
 # Build da aplicação (gera a pasta /dist)
-RUN npm run build
+RUN echo "BUILD AT $(date)" && npm run build
 
 # -----------------------------
 # 2) Etapa de deploy (Nginx)

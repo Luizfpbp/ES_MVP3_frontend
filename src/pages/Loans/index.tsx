@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LOAN_QUERY_KEY } from "./constants/queries";
 import { toast } from "react-toastify";
 import type { LoanListDTO } from "./types";
+import { HOME_QUERY_KEY } from "../Home/constants/queries";
 
 const DB_URL = import.meta.env.VITE_API_URL;
 
@@ -17,7 +18,13 @@ const Loans = () => {
     queryKey: [LOAN_QUERY_KEY.LIST_LOANS],
     queryFn: async () => {
       const response = await fetch(`${DB_URL}/emprestimos`);
-      return await response.json();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message);
+      }
+
+      return data;
     },
   });
 
@@ -29,11 +36,21 @@ const Loans = () => {
         body: form,
       });
 
-      return await response.json();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message);
+      }
+
+      return data;
     },
     onSuccess() {
       toast.success("Livro retornado com sucesso");
       queryClient.invalidateQueries({ queryKey: [LOAN_QUERY_KEY.LIST_LOANS] });
+      queryClient.invalidateQueries({ queryKey: [HOME_QUERY_KEY.BOOKS_LIST] });
+      queryClient.invalidateQueries({
+        queryKey: [HOME_QUERY_KEY.BOOKS_LIST_OPTIONS],
+      });
     },
     onError() {
       toast.error("Erro ao retornar o livro");
@@ -159,8 +176,12 @@ const Loans = () => {
               <thead className="[&_tr]:border-b">
                 <tr className="border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 bg-muted/50">
                   <th className="font-semibold text-start py-1 px-4">Livro</th>
-                  <th className="font-semibold text-start py-1 px-4">Usuário</th>
-                  <th className="font-semibold text-start py-1 px-4">Devolução</th>
+                  <th className="font-semibold text-start py-1 px-4">
+                    Usuário
+                  </th>
+                  <th className="font-semibold text-start py-1 px-4">
+                    Devolução
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">

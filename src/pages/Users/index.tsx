@@ -18,7 +18,13 @@ const Users = () => {
       const url = `${DB_URL}/usuarios`;
 
       const response = await fetch(url);
-      return await response.json();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message);
+      }
+
+      return data;
     },
   });
 

@@ -44,7 +44,13 @@ const UserForm = () => {
         body: values,
       });
 
-      return await response.json();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message);
+      }
+
+      return data;
     },
     onSuccess() {
       toast.success("Sucesso ao criar um usuário");
@@ -61,10 +67,10 @@ const UserForm = () => {
 
   useEffect(() => {
     if (zipData) {
-      setValue("address.state", zipData.uf);
-      setValue("address.street", zipData.logradouro);
-      setValue("address.neighborhood", zipData.bairro);
-      setValue("address.city", zipData.localidade);
+      setValue("address.state", zipData.state);
+      setValue("address.street", zipData.street);
+      setValue("address.neighborhood", zipData.neighborhood);
+      setValue("address.city", zipData.city);
     }
   }, [zipData, setValue]);
 

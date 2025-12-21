@@ -48,7 +48,13 @@ const NewLoanModal = ({ open, setOpen }: NewLoanModalProps) => {
         body: form,
       });
 
-      return await response.json();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message);
+      }
+
+      return data;
     },
     onSuccess() {
       toast.success("Livro emprestado com sucesso");
@@ -80,7 +86,13 @@ const NewLoanModal = ({ open, setOpen }: NewLoanModalProps) => {
       const url = `${DB_URL}/usuarios`;
 
       const response = await fetch(url);
-      return await response.json();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message);
+      }
+
+      return data;
     },
   });
 
